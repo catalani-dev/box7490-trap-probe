@@ -1,26 +1,28 @@
-# OpenWrt-7490.bat
+# Box7490.bat
 
 **English** · [Italiano](README.it.md)
 
-A single Windows file that runs OpenWrt on an **AVM FRITZ!Box 7490**: first in RAM only, then, if you want, installed on the flash. It also turns the box into a **LAN trap** or a **monitoring probe**. The menus and messages are in Italian.
+A single Windows file that runs *OpenWrt* on an **AVM FRITZ!Box 7490**: first in RAM only, then, if you want, installed on the flash. It also turns the box into a **LAN trap** or a **monitoring probe**. The menus and messages are in Italian.
 
-Part of [fritzbox-7490-openwrt](../README.md). The trap works with the [LAN Trap Receiver](../lan-trap-receiver/README.md).
+Part of [box7490-trap-probe](../README.md). The trap works with the [LAN Trap Receiver](../lan-trap-receiver/README.md).
+
+> Not affiliated with the *OpenWrt* project or with FRITZ! GmbH (formerly AVM). *OpenWrt* is a registered trademark owned by Software Freedom Conservancy (SFC); FRITZ!Box is a trademark of FRITZ! GmbH. The tool downloads *OpenWrt* from https://openwrt.org and does not redistribute it: see [License, third-party software and trademarks](../README.md#license-third-party-software-and-trademarks).
 
 > [!WARNING]
-> Installing OpenWrt **replaces FRITZ!OS**. The 7490 loses Wi-Fi, DECT, telephony, the AVM apps and AVM updates. The flash installation has not been tried with this tool yet: read [Status](#status) first.
+> Installing *OpenWrt* **replaces FRITZ!OS**. The 7490 loses Wi-Fi, DECT, telephony, the AVM apps and AVM updates. The flash installation has not been tried with this tool yet: read [Status](#status) first.
 
 ## What it does
 
 | Menu item | What happens |
 |---|---|
 | **Avvia in RAM** (boot in RAM) | Downloads the official initramfs image, checks it and loads it into RAM through the AVM bootloader (EVA). Nothing is written to the flash: switching the box off brings FRITZ!OS back. |
-| **Installa sulla flash** (install on flash) | Replaces FRITZ!OS with OpenWrt (`sysupgrade -n`). Before writing it checks the NAND variant and the kernel log, and on Micron NAND it asks you to type that you accept the risk. |
+| **Installa sulla flash** (install on flash) | Replaces FRITZ!OS with *OpenWrt* (`sysupgrade -n`). Before writing it checks the NAND variant and the kernel log, and on Micron NAND it asks you to type that you accept the risk. |
 | **Configura come trappola** (trap) | The box becomes a client of the LAN and logs every attempt to connect to ports such as SMB, RDP, Telnet or databases. |
 | **Configura come sonda** (probe) | The box becomes a client of the LAN with a WireGuard management tunnel, a Zabbix or Prometheus agent, and iperf3, tcpdump and mtr. |
 | **Stato del box** (status) | Version, NAND, address, clock, trap, tunnels and agents of the box. |
 | **Strumenti** (tools) | SSH console, LuCI in the browser, save dmesg and logs (without keys or passwords), reboot. |
 | **Rete del PC** (PC network) | Sets the work addresses on the network adapter connected to the box, or puts back the previous settings. |
-| **Impostazioni** (settings) | Box address, OpenWrt version, network adapter, program folder. |
+| **Impostazioni** (settings) | Box address, *OpenWrt* version, network adapter, program folder. |
 
 ## Requirements
 
@@ -32,24 +34,24 @@ Part of [fritzbox-7490-openwrt](../README.md). The trap works with the [LAN Trap
 
 | File | Source | Check |
 |---|---|---|
-| OpenWrt images (initramfs, sysupgrade) | downloads.openwrt.org | SHA256 compared with the official `sha256sums` of the same release |
+| *OpenWrt* images (initramfs, sysupgrade) | downloads.openwrt.org | SHA256 compared with the official `sha256sums` of the same release |
 | Images with extra packages (trap, probe) | the official build service sysupgrade.openwrt.org | SHA256 returned by the service; the package list is checked against the build manifest |
-| `eva_ramboot.py` | OpenWrt repository, pinned commit | fixed SHA256 |
+| `eva_ramboot.py` | *OpenWrt* repository, pinned commit | fixed SHA256 |
 | Python embeddable (runs `eva_ramboot.py`, nothing is installed) | python.org | fixed SHA256 and Authenticode signature of the Python Software Foundation |
 
-Files created next to the script: `cache\` (downloads), `stato\` (settings, last answers, saved adapter configuration), `log\` (session transcripts and the output of each configuration, including the WireGuard `[Peer]` block). The tool uses its own SSH key, `%USERPROFILE%\.ssh\openwrt-7490_ed25519`, and installs it on the box when it configures it.
+Files created next to the script: `cache\` (downloads), `stato\` (settings, last answers, saved adapter configuration), `log\` (session transcripts and the output of each configuration, including the WireGuard `[Peer]` block). The tool uses its own SSH key, `%USERPROFILE%\.ssh\box7490_ed25519`, and installs it on the box when it configures it.
 
 ## Step by step
 
 1. **Find the NAND maker.** In FRITZ!OS open `http://192.168.178.1/support.lua`, save the support data (it takes a couple of minutes) and search for `NAND device`. Manufacturer ID `0x2c` is Micron and needs the `-micron` images; `0x98` (Toshiba), `0xad` (Hynix), `0xec` (Samsung) and `0xc2` (Macronix) use the standard ones. The same file shows `HWRevision` (185 = 7490).
-2. **Boot in RAM.** Choose the NAND variant, let the tool set the work addresses on the adapter, then switch the FRITZ!Box off, wait 5 seconds and switch it on. EVA accepts the upload only for a few seconds after power-on: the tool waits for it. OpenWrt answers on `192.168.1.1` after 1-2 minutes (SSH as `root`, no password; LuCI with the same login).
-3. **Check the kernel log**, shown by the tool. On a healthy box with FRITZ!OS still on the flash you see `nand: device found, Manufacturer ID: …` and `UBI error: no valid UBI magic found inside mtd1`. That UBI line is normal: FRITZ!OS does not use UBI, so OpenWrt does not attach the partition and writes nothing. Lines with `Bad eraseblock`, ECC errors, bitflips or other UBI errors are a reason to stop: the tool refuses to install in that case.
+2. **Boot in RAM.** Choose the NAND variant, let the tool set the work addresses on the adapter, then switch the FRITZ!Box off, wait 5 seconds and switch it on. EVA accepts the upload only for a few seconds after power-on: the tool waits for it. *OpenWrt* answers on `192.168.1.1` after 1-2 minutes (SSH as `root`, no password; LuCI with the same login).
+3. **Check the kernel log**, shown by the tool. On a healthy box with FRITZ!OS still on the flash you see `nand: device found, Manufacturer ID: …` and `UBI error: no valid UBI magic found inside mtd1`. That UBI line is normal: FRITZ!OS does not use UBI, so *OpenWrt* does not attach the partition and writes nothing. Lines with `Bad eraseblock`, ECC errors, bitflips or other UBI errors are a reason to stop: the tool refuses to install in that case.
 4. **Try a profile in RAM** if you like. The settings are lost when the box is switched off.
 5. **Install on the flash** with the image that matches the NAND. The tool copies the image to the box, compares its SHA256, runs `sysupgrade -T` and asks you to type `INSTALLA` before `sysupgrade -n`. Then configure the trap or the probe again: the installed system starts from defaults.
 
 ### Why the PC uses fixed addresses without a gateway
 
-The tool sets `192.168.178.2/24` (for EVA, which has no DHCP) and `192.168.1.2/24` (for OpenWrt) on the cable, with **no gateway**. A FRITZ!Box without a DSL line answers every DNS query with its own address: a PC that uses it as gateway loses internet and TLS. The previous settings of the adapter are saved and can be restored from **Rete del PC**, or when you exit.
+The tool sets `192.168.178.2/24` (for EVA, which has no DHCP) and `192.168.1.2/24` (for *OpenWrt*) on the cable, with **no gateway**. A FRITZ!Box without a DSL line answers every DNS query with its own address: a PC that uses it as gateway loses internet and TLS. The previous settings of the adapter are saved and can be restored from **Rete del PC**, or when you exit.
 
 ## Profiles
 
@@ -78,13 +80,13 @@ The configuration is plain shell code in [`profili/`](profili), sent to the box 
 
 | Part | Checked | Not checked yet |
 |---|---|---|
-| OpenWrt 25.12.6 in RAM on a 7490 with Micron NAND (HWRevision 185, FRITZ!OS 7.62), with the official `eva_ramboot.py` | On real hardware: boot, SSH, LuCI, dmesg | |
+| *OpenWrt* 25.12.6 in RAM on a 7490 with Micron NAND (HWRevision 185, FRITZ!OS 7.62), with the official `eva_ramboot.py` | On real hardware: boot, SSH, LuCI, dmesg | |
 | Trap rule | In RAM on real hardware: 5 log lines per attempt (Windows retries a refused SYN), exclusion set changed live | |
 | Flash installation and return to FRITZ!OS | | Not tried. The usual way back is the AVM recovery tool for the model, through EVA |
 | DSL | Firmware and driver load | A real line; Italian lines probably need annex A instead of the default annex B |
 
-Only the FRITZ!Box 7490 is supported. Other FRITZ!Box models supported by OpenWrt need different procedures (for example the 7520 and 7530 need U-Boot on the flash).
+Only the FRITZ!Box 7490 is supported. Other FRITZ!Box models supported by *OpenWrt* need different procedures (for example the 7520 and 7530 need U-Boot on the flash).
 
 ## License
 
-[MIT](../LICENSE)
+[MIT](../LICENSE). Third-party licenses and trademarks: [main README](../README.md#license-third-party-software-and-trademarks).

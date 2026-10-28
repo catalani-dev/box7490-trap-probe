@@ -1,7 +1,7 @@
-# OpenWrt-7490.bat: downloads, settings and logs created next to the script
-openwrt-7490/cache/
-openwrt-7490/stato/
-openwrt-7490/log/
+# Box7490.bat: downloads, settings and logs created next to the script
+box7490/cache/
+box7490/stato/
+box7490/log/
 
 # Python
 __pycache__/

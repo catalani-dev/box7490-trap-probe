@@ -1,9 +1,9 @@
-<# : OpenWrt-7490 - batch launcher (keep this first line exactly as it is)
+<# : Box7490 - batch launcher (keep this first line exactly as it is)
 @echo off
 setlocal
 set "PSModulePath="
 set "OW_BAT=%~f0"
-title OpenWrt per FRITZ!Box 7490
+title Box7490 - trappola e sonda per FRITZ!Box 7490
 set "PSEXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
 if exist "%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\powershell.exe" set "PSEXE=%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\powershell.exe"
 "%PSEXE%" -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "&([ScriptBlock]::Create([IO.File]::ReadAllText($env:OW_BAT, [Text.Encoding]::UTF8)))"
@@ -11,7 +11,7 @@ if errorlevel 1 pause
 exit /b
 #>
 <#
-  OpenWrt-7490.bat - runs OpenWrt on an AVM FRITZ!Box 7490: in RAM only, or installed on the flash,
+  Box7490.bat - runs OpenWrt on an AVM FRITZ!Box 7490: in RAM only, or installed on the flash,
   and turns it into a LAN trap or a monitoring probe.
   Requirements: Windows 10/11 with the OpenSSH client, an administrator account (to set the IP
   addresses of the wired adapter), a cable to a LAN port of the box.
@@ -60,7 +60,7 @@ $ImagePackages = @{
 $TrapPorts = '21 23 139 445 1433 3306 3389 5900 8080'
 $SshExe = Join-Path $env:SystemRoot 'System32\OpenSSH\ssh.exe'
 $SshKeygen = Join-Path $env:SystemRoot 'System32\OpenSSH\ssh-keygen.exe'
-$KeyPath = Join-Path $env:USERPROFILE '.ssh\openwrt-7490_ed25519'
+$KeyPath = Join-Path $env:USERPROFILE '.ssh\box7490_ed25519'
 
 # ============================== ADMINISTRATOR ==============================
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -126,7 +126,7 @@ function Show-Header([int]$W) {
     $ad = $Settings.Adapter; if (-not $ad) { $ad = '(da scegliere)' }
     Write-Host ''
     Write-Host ('  ' + ('=' * $W)) -ForegroundColor Cyan
-    Write-Host ('  ' + (' ' * [Math]::Max(0, [int](($W - 26) / 2))) + 'OPENWRT PER FRITZ!BOX 7490') -ForegroundColor White
+    Write-Host ('  ' + (' ' * [Math]::Max(0, [int](($W - 26) / 2))) + 'BOX7490 - TRAPPOLA E SONDA') -ForegroundColor White
     $sub = "Box $($Settings.BoxIp)  -  scheda PC: $ad  -  OpenWrt $ver"
     Write-Host ('  ' + (' ' * [Math]::Max(0, [int](($W - $sub.Length) / 2))) + $sub) -ForegroundColor DarkGray
     Write-Host ('  ' + ('=' * $W)) -ForegroundColor Cyan
@@ -375,7 +375,7 @@ function Get-AsuImage([string]$variant, [string[]]$packages, [string]$label) {
     $profile = $BoardProfiles[$variant]
     Step "Immagine $label costruita dal servizio ufficiale sysupgrade.openwrt.org"
     Say ('Pacchetti aggiunti a quelli standard: ' + ($packages -join ', '))
-    $body = @{ version = $ver; target = $Target; profile = $profile; packages = $packages; diff_packages = $false; client = "openwrt-7490-tool/$ToolVersion" } | ConvertTo-Json
+    $body = @{ version = $ver; target = $Target; profile = $profile; packages = $packages; diff_packages = $false; client = "box7490/$ToolVersion" } | ConvertTo-Json
     $r = Invoke-Asu 'POST' "$AsuUrl/api/v1/build" $body
     $deadline = (Get-Date).AddMinutes(30)
     $hash = $null
@@ -580,7 +580,7 @@ function Invoke-Box([string]$Command = 'sh -s', [string]$Script = $null, [string
 function Get-SshPublicKey {
     if (-not (Test-Path $KeyPath)) {
         New-Dir (Split-Path $KeyPath) | Out-Null
-        & $SshKeygen -q -t ed25519 -N '""' -C "openwrt-7490-tool@$env:COMPUTERNAME" -f $KeyPath | Out-Null
+        & $SshKeygen -q -t ed25519 -N '""' -C "box7490@$env:COMPUTERNAME" -f $KeyPath | Out-Null
         if (-not (Test-Path "$KeyPath.pub")) { throw 'Creazione della chiave SSH non riuscita.' }
         Ok "nuova chiave SSH del programma: $KeyPath"
     }

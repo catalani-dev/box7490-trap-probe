@@ -2,9 +2,9 @@
 
 **English** · [Italiano](README.it.md)
 
-Part of [fritzbox-7490-openwrt](../README.md): the Windows tool [`OpenWrt-7490.bat`](../openwrt-7490/README.md) sets up a FRITZ!Box 7490 as a trap, also with the script printed by `lantrap openwrt`.
+Part of [box7490-trap-probe](../README.md): the Windows tool [`Box7490.bat`](../box7490/README.md) sets up a FRITZ!Box 7490 as a trap, also with the script printed by `lantrap openwrt`.
 
-A small, always-on syslog receiver for **LAN traps**: OpenWrt boxes placed in a local network that offer no services but log every attempt to connect to ports such as SMB, RDP, Telnet or databases. Nobody has a reason to touch those ports on that box, so every attempt is worth a look: a port scan, a worm, someone moving sideways.
+A small, always-on syslog receiver for **LAN traps**: *OpenWrt* boxes placed in a local network that offer no services but log every attempt to connect to ports such as SMB, RDP, Telnet or databases. Nobody has a reason to touch those ports on that box, so every attempt is worth a look: a port scan, a worm, someone moving sideways.
 
 The receiver recognises which trap and which customer a message comes from, drops the addresses that are allowed to scan (for example the IT team's scanners), groups the many log lines of one scan into a single incident, sends one alert by e-mail, Google Chat, webhook or an external command, and keeps the history.
 
@@ -34,8 +34,8 @@ kern.warn kernel: [19765.020000] LANTRAP: IN=br-lan OUT= MAC=… SRC=192.168.1.2
 
 - **No dependencies.** Python 3.11 or later with the standard library only. Runs on Linux, Windows, macOS and in Docker.
 - **Interactive menu** with arrow keys, number keys, Enter and Esc, in **English** (default) or **Italian**. Every setting of the configuration can be changed from it, and every action is also a subcommand for scripts and services.
-- **Listeners:** UDP, TCP and TLS (optionally with client certificates), any combination and any port. TCP accepts LF or NUL trailers (OpenWrt `logd`) and RFC 6587 octet counting (rsyslog, syslog-ng).
-- **Formats:** RFC 3164 as sent by OpenWrt `logd`, RFC 5424, and lines copied from `logread`.
+- **Listeners:** UDP, TCP and TLS (optionally with client certificates), any combination and any port. TCP accepts LF or NUL trailers (*OpenWrt* `logd`) and RFC 6587 octet counting (rsyslog, syslog-ng).
+- **Formats:** RFC 3164 as sent by *OpenWrt* `logd`, RFC 5424, and lines copied from `logread`.
 - **Trap identity** from the sender address (best inside WireGuard, where the address is tied to the key) with an optional hostname check. Unknown senders are dropped and listed, so they can be added as traps from the menu.
 - **Exclusions** by IP address, network or MAC address, globally, per customer or per trap. Excluded hits are recorded but never alert.
 - **Grouping:** repeated lines for the same port are one attempt, and attempts from the same source to the same trap are one incident until it goes quiet. A port scan produces one alert, not dozens.
@@ -43,12 +43,12 @@ kern.warn kernel: [19765.020000] LANTRAP: IN=br-lan OUT= MAC=… SRC=192.168.1.2
 - **Heartbeat:** an alert when a trap stops sending logs, and another when it comes back.
 - **History:** SQLite (needed for status and reports), JSON Lines and CSV files, any combination, with retention in days.
 - **Live configuration reload:** exclusions, traps and alert channels change without a restart.
-- **Box setup:** `lantrap openwrt <trap>` prints the shell script for the OpenWrt box: firewall rule, remote log, NTP, heartbeat and WireGuard.
+- **Box setup:** `lantrap openwrt <trap>` prints the shell script for the *OpenWrt* box: firewall rule, remote log, NTP, heartbeat and WireGuard.
 
 ## Quick start
 
 ```bash
-git clone https://github.com/catalani-dev/fritzbox-7490-openwrt.git && cd fritzbox-7490-openwrt/lan-trap-receiver
+git clone https://github.com/catalani-dev/box7490-trap-probe.git && cd box7490-trap-probe/lan-trap-receiver
 python3 -m lantrap init          # writes lantrap.toml with default settings
 python3 -m lantrap               # interactive menu
 ```
@@ -64,7 +64,7 @@ Every setting can be changed from the menu, and only the ones you choose:
 - **Forms.** Each section lists all of its settings with their current value; a setting that was never changed shows its default. Pick a line and press Enter to change it: yes/no settings switch at once, choices and event filters open a list, the other values are typed. `-` puts a setting back to its default. **Save** checks the whole configuration and writes it; **Cancel** or Esc leaves everything as it was.
 - **Lists.** Listeners, alert channels, history formats, customers and traps are lists: add as many entries as you need, including several channels of the same type, then edit or remove each one. A channel can also send a test alert from its own page.
 - **Secrets** (SMTP password, webhook URLs, HMAC secret) can be stored as an environment variable name, a file path or the value itself.
-- **Sections:** General, Listeners, Alert channels, Storage, Grouping, Heartbeat, OpenWrt box setup, WireGuard; and, under Clients, the customers with their traps and exclusions, all traps, the exclusions for every customer, and new traps from senders that are not configured yet.
+- **Sections:** General, Listeners, Alert channels, Storage, Grouping, Heartbeat, *OpenWrt* box setup, WireGuard; and, under Clients, the customers with their traps and exclusions, all traps, the exclusions for every customer, and new traps from senders that are not configured yet.
 
 Typical first steps:
 
@@ -155,7 +155,7 @@ Webhooks and commands receive this JSON document (schema `lantrap.alert/1`):
 
 With `secret` set, a webhook request carries `X-Lantrap-Signature: sha256=<HMAC-SHA256 of the body>`; every request carries `X-Lantrap-Event: <kind>`. A `command` channel gets the same JSON on standard input and the variables `LANTRAP_EVENT` and `LANTRAP_ALERT_ID`; a non-zero exit code counts as a failure. This is the place to plug in a ticketing system. Every channel is tried three times; if it still fails, the alert is tried again after 1, 5, 15, 30, 60, 120 and 240 minutes (in memory, so a restart forgets those retries). The result of each delivery is recorded in the history.
 
-## Setting up a trap (OpenWrt)
+## Setting up a trap (*OpenWrt*)
 
 ```bash
 python3 -m lantrap openwrt example-hq -o lantrap-example-hq.sh
@@ -164,7 +164,7 @@ scp -O lantrap-example-hq.sh root@192.168.1.1:/tmp/ && ssh root@192.168.1.1 sh /
 
 The script, which can be run again after a change:
 
-1. With `[wireguard]` and `tunnel_ip` set: installs WireGuard (`apk` on OpenWrt 25.12 and later, `opkg` before), creates a key on the box, sets up the tunnel to the receiver and prints the `[Peer]` block for the receiver.
+1. With `[wireguard]` and `tunnel_ip` set: installs WireGuard (`apk` on *OpenWrt* 25.12 and later, `opkg` before), creates a key on the box, sets up the tunnel to the receiver and prints the `[Peer]` block for the receiver.
 2. Writes `/etc/nftables.d/10-lantrap.nft` ([example](openwrt/10-lantrap.nft)) with the ports, the rate limit and the excluded IPv4 addresses (IPv6 with `ipv6 = true`), then runs `fw4 check`. If the check fails, the previous file is put back and the script stops before reloading the firewall; otherwise it runs `fw4 reload`.
 3. Sets `log_ip`, `log_port`, `log_proto` and `log_hostname` in `/etc/config/system` and restarts the log service.
 4. Enables NTP. Without a correct clock, the times written by the box are wrong; the receiver groups by its own clock and reports traps whose clock is off.
@@ -218,7 +218,7 @@ Exit codes: 0 success, 1 failure, 2 configuration error.
 - Incidents live in memory. After a restart, incidents left open are closed in the history, and new activity starts a new incident.
 - Delivery retries live in memory: an alert that is still failing when the receiver stops is recorded as failed and not tried again.
 - With `unknown_sources = "accept"`, every new sender address is tracked as a trap: use it only behind a tunnel or an allow list.
-- One remote log destination per OpenWrt box, which is a limit of `logd`. For a second receiver, use rsyslog or syslog-ng on the box.
+- One remote log destination per *OpenWrt* box, which is a limit of `logd`. For a second receiver, use rsyslog or syslog-ng on the box.
 - The receiver does not check that a trap is reachable: the heartbeat only notices that its messages stopped.
 
 ## Development
@@ -227,8 +227,8 @@ Exit codes: 0 success, 1 failure, 2 configuration error.
 python3 -m unittest discover -s tests
 ```
 
-The tests cover parsing of real OpenWrt lines, grouping, exclusions, heartbeat, every alert channel (against local fake SMTP and HTTP servers), the history formats, the menu and an end-to-end run over real UDP and TCP sockets.
+The tests cover parsing of real *OpenWrt* lines, grouping, exclusions, heartbeat, every alert channel (against local fake SMTP and HTTP servers), the history formats, the menu and an end-to-end run over real UDP and TCP sockets.
 
 ## License
 
-[MIT](../LICENSE)
+[MIT](../LICENSE). Not affiliated with the *OpenWrt* project; *OpenWrt* is a registered trademark owned by Software Freedom Conservancy (SFC), https://openwrt.org. More in the [main README](../README.md#license-third-party-software-and-trademarks).
