@@ -48,15 +48,15 @@ Versione 0.1.0, la prima pubblica.
 
 | Parte | Verificato | Non ancora verificato |
 |---|---|---|
-| OpenWrt 25.12.6 in RAM su un 7490 con NAND Micron | A mano su hardware vero: avvio tramite EVA, SSH, LuCI, dmesg | |
-| Regola della trappola | A mano, in RAM, su hardware vero | Installazione permanente |
-| `OpenWrt-7490.bat` e i suoi profili | Parser, moduli con risposte simulate, script eseguiti in un OpenWrt simulato | Un'esecuzione completa su hardware vero; installazione sulla flash |
+| OpenWrt 25.12.6 in RAM su un 7490 con NAND Micron | Su hardware vero: avvio tramite EVA, SSH, LuCI, dmesg | |
+| Regola della trappola | In RAM, su hardware vero | |
+| Installazione sulla flash | | Non ancora provata |
 | LAN Trap Receiver | 111 test automatici (uno viene saltato su Windows), compresa una prova su socket UDP e TCP veri | Con un box vero |
 
 ## Sicurezza
 
 - Installare OpenWrt sostituisce FRITZ!OS: si perdono Wi-Fi, DECT, telefonia e aggiornamenti di AVM.
-- L'installazione sulla flash non è ancora stata provata con questo strumento. Sui box con NAND Micron sono stati segnalati problemi con alcune versioni di OpenWrt: la prima installazione va fatta su un box senza NAND Micron.
+- L'installazione sulla flash non è ancora stata provata. Sui box con NAND Micron sono stati segnalati problemi con alcune versioni di OpenWrt: la prima installazione va fatta su un box senza NAND Micron.
 - È supportato solo il FRITZ!Box 7490.
 - Usa trappole e sonde solo su reti di cui sei responsabile.
 - Il software è fornito senza alcuna garanzia: vedi la licenza.

@@ -44,15 +44,15 @@ Version 0.1.0, first public release.
 
 | Part | Checked | Not checked yet |
 |---|---|---|
-| OpenWrt 25.12.6 in RAM on a 7490 with Micron NAND | By hand on real hardware: boot through EVA, SSH, LuCI, dmesg | |
-| Trap rule | By hand in RAM on real hardware | Permanent installation |
-| `OpenWrt-7490.bat` and its profiles | Parsers, forms with scripted answers, scripts run in a simulated OpenWrt | A complete run on real hardware; flash installation |
+| OpenWrt 25.12.6 in RAM on a 7490 with Micron NAND | On real hardware: boot through EVA, SSH, LuCI, dmesg | |
+| Trap rule | In RAM on real hardware | |
+| Flash installation | | Not tried yet |
 | LAN Trap Receiver | 111 automated tests (one is skipped on Windows), including a run over real UDP and TCP sockets | With a real box |
 
 ## Safety
 
 - Installing OpenWrt replaces FRITZ!OS: Wi-Fi, DECT, telephony and AVM updates are lost.
-- The flash installation has not been tried with this tool yet. On units with Micron NAND, problems have been reported with some OpenWrt versions: do the first flash on a unit without Micron NAND.
+- The flash installation has not been tried yet. On units with Micron NAND, problems have been reported with some OpenWrt versions: do the first flash on a unit without Micron NAND.
 - Only the FRITZ!Box 7490 is supported.
 - Use traps and probes only on networks you are responsible for.
 - The software comes without any warranty: see the license.

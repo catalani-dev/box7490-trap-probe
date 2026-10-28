@@ -111,10 +111,8 @@ I pacchetti devono essere già nell'immagine, cioè installata con la voce "Imma
 
 | Parte | Verificato | Non ancora verificato |
 |---|---|---|
-| OpenWrt 25.12.6 in RAM su un 7490 con NAND Micron (HWRevision 185, FRITZ!OS 7.62), con il `eva_ramboot.py` ufficiale | A mano su hardware vero: avvio, SSH, LuCI, dmesg | |
-| Regola della trappola | A mano, in RAM, su hardware vero: 5 righe di log per tentativo (Windows ritenta il SYN rifiutato), set di esclusione cambiato a caldo | Installazione permanente |
-| `OpenWrt-7490.bat` | Parser di Windows PowerShell 5.1 e di PowerShell 7; moduli con risposte simulate; lanciatore da cmd e da PowerShell 7 | **Un'esecuzione completa su hardware vero** |
-| Profili | Sintassi POSIX (dash) ed esecuzione in un OpenWrt simulato (`uci`, `fw4`, `wg`, `apk` finti) | Su hardware vero |
+| OpenWrt 25.12.6 in RAM su un 7490 con NAND Micron (HWRevision 185, FRITZ!OS 7.62), con il `eva_ramboot.py` ufficiale | Su hardware vero: avvio, SSH, LuCI, dmesg | |
+| Regola della trappola | In RAM, su hardware vero: 5 righe di log per tentativo (Windows ritenta il SYN rifiutato), set di esclusione cambiato a caldo | |
 | Installazione sulla flash e ritorno a FRITZ!OS | | Non provati. Di solito si torna indietro con il programma di ripristino AVM del modello, che passa da EVA |
 | DSL | Firmware e driver si caricano | Una linea vera; per le linee italiane serve probabilmente l'annex A al posto dell'annex B predefinito |
 

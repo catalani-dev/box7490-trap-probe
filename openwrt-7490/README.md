@@ -78,10 +78,8 @@ The configuration is plain shell code in [`profili/`](profili), sent to the box 
 
 | Part | Checked | Not checked yet |
 |---|---|---|
-| OpenWrt 25.12.6 in RAM on a 7490 with Micron NAND (HWRevision 185, FRITZ!OS 7.62), with the official `eva_ramboot.py` | Done by hand on real hardware: boot, SSH, LuCI, dmesg | |
-| Trap rule | By hand in RAM on real hardware: 5 log lines per attempt (Windows retries a refused SYN), exclusion set changed live | Permanent installation |
-| `OpenWrt-7490.bat` | Windows PowerShell 5.1 and PowerShell 7 parsers; forms with scripted answers; launcher from cmd and from PowerShell 7 | **A complete run on real hardware** |
-| Profiles | POSIX syntax (dash) and a run in a simulated OpenWrt (stub `uci`, `fw4`, `wg`, `apk`) | On real hardware |
+| OpenWrt 25.12.6 in RAM on a 7490 with Micron NAND (HWRevision 185, FRITZ!OS 7.62), with the official `eva_ramboot.py` | On real hardware: boot, SSH, LuCI, dmesg | |
+| Trap rule | In RAM on real hardware: 5 log lines per attempt (Windows retries a refused SYN), exclusion set changed live | |
 | Flash installation and return to FRITZ!OS | | Not tried. The usual way back is the AVM recovery tool for the model, through EVA |
 | DSL | Firmware and driver load | A real line; Italian lines probably need annex A instead of the default annex B |
 
