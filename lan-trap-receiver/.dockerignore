@@ -1,0 +1,9 @@
+.git
+data
+deploy/config
+deploy/data
+tests
+**/__pycache__
+lantrap.toml
+lantrap.json
+*.log

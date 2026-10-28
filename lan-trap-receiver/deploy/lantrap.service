@@ -1,0 +1,39 @@
+# systemd unit for a typical Linux install:
+#   program in /opt/lan-trap-receiver, configuration in /etc/lantrap, history in /var/lib/lantrap
+#   useradd --system --home-dir /var/lib/lantrap --shell /usr/sbin/nologin lantrap
+#   install -d -o lantrap -g lantrap /var/lib/lantrap
+#   cp deploy/lantrap.service /etc/systemd/system/ && systemctl daemon-reload && systemctl enable --now lantrap
+# `lantrap service systemd` prints a unit with the paths of your installation.
+[Unit]
+Description=LAN Trap Receiver
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lantrap
+Group=lantrap
+WorkingDirectory=/opt/lan-trap-receiver
+ExecStart=/usr/bin/python3 -m lantrap --config /etc/lantrap/lantrap.toml run
+ExecReload=/bin/kill -HUP $MAINPID
+# Secrets referenced with *_env in the configuration (file readable by root only)
+EnvironmentFile=-/etc/lantrap/secrets.env
+Restart=on-failure
+RestartSec=5
+# Only needed to listen on ports below 1024 (for example 514)
+#AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadWritePaths=/var/lib/lantrap
+ReadOnlyPaths=/etc/lantrap
+
+[Install]
+WantedBy=multi-user.target

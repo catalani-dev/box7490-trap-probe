@@ -1,0 +1,19 @@
+# Local configuration (may contain secrets) and generated files
+lantrap.toml
+lantrap.json
+lantrap.toml.tmp
+lantrap.json.tmp
+lantrap-*.sh
+lantrap-service.cmd
+lantrap.log*
+/data/
+deploy/config/
+deploy/data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/

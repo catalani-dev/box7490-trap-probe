@@ -1,0 +1,16 @@
+# WireGuard on the receiver (Linux: /etc/wireguard/wg0.conf, then: systemctl enable --now wg-quick@wg0)
+# Keys:  umask 077; wg genkey | tee receiver.key | wg pubkey > receiver.pub
+# Put the content of receiver.pub in [wireguard] public_key of the receiver configuration.
+# Open UDP 51820 towards this host; the traps connect out to it, nothing has to be opened at the client sites.
+
+[Interface]
+Address = 10.99.0.1/24
+ListenPort = 51820
+PrivateKey = REPLACE_WITH_THE_CONTENT_OF_receiver.key
+
+# One [Peer] per trap: the setup script printed by `lantrap openwrt <trap>` shows this block
+# with the public key generated on the box.
+[Peer]
+# trap example-hq
+PublicKey = REPLACE_WITH_THE_PUBLIC_KEY_OF_THE_TRAP
+AllowedIPs = 10.99.0.11/32

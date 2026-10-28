@@ -1,0 +1,135 @@
+# LAN Trap Receiver - example configuration.
+# Copy it to lantrap.toml (or use `lantrap init`, or the menu) and adapt it.
+# Every section is optional; lists of tables ([[listen]], [[store]], [[notify]]) can hold several entries.
+# The receiver reloads this file by itself when it changes (listeners and storage need a restart).
+
+language = "en"                 # alerts and menu: "en" or "it"
+prefixes = ["LANTRAP:"]         # log prefixes of the trap rule; [] = any netfilter LOG line
+unknown_sources = "drop"        # messages from senders that are not a configured trap: "drop" or "accept"
+store_excluded = true           # keep excluded hits in the history (they never raise alerts)
+store_other = false             # keep the other messages of the traps (heartbeat, system log)
+exclude = []                    # global exclusions: addresses, networks or MAC addresses allowed to scan
+
+[grouping]
+collect_seconds = 60            # wait before the first alert of an incident, to gather the whole scan
+quiet_minutes = 15              # an incident ends after this much silence from the same source
+retry_seconds = 5               # lines for the same port within this time are one attempt (SYN retries)
+reminder_minutes = 60           # reminder while an incident goes on; 0 = none
+scan_ports = 3                  # distinct ports that make a port scan instead of a connection attempt
+notify_on_close = false         # also alert when an incident ends
+max_alerts_per_hour = 30        # incident alerts per hour and client; the rest wait and go out later; 0 = no limit
+
+[heartbeat]
+enabled = true                  # alert when a trap sends nothing for missing_minutes
+missing_minutes = 30
+
+# ---------------------------------------------------------------- listeners
+[[listen]]
+protocol = "udp"                # OpenWrt default (log_proto udp)
+address = "0.0.0.0"             # inside WireGuard: the tunnel address of the receiver
+port = 5514
+# allow = ["10.99.0.0/24"]      # optional: accept only these senders
+
+# [[listen]]
+# protocol = "tcp"              # OpenWrt log_proto tcp: lines end with LF, or NUL with log_trailer_null
+# address = "0.0.0.0"
+# port = 5514
+
+# [[listen]]
+# protocol = "tls"              # rsyslog or syslog-ng with TLS (RFC 5425 framing is accepted)
+# address = "0.0.0.0"
+# port = 6514
+# certfile = "tls/server.crt"
+# keyfile = "tls/server.key"
+# cafile = "tls/clients-ca.crt" # optional: require client certificates
+
+# ---------------------------------------------------------------- history
+[[store]]
+type = "sqlite"                 # needed by `lantrap status`, `incidents` and the menu reports
+path = "data/lantrap.sqlite3"
+retention_days = 365
+
+# [[store]]
+# type = "jsonl"                # one JSON object per line, one file per day
+# directory = "data/jsonl"
+# retention_days = 90
+
+# [[store]]
+# type = "csv"                  # one file per day, opens in a spreadsheet
+# directory = "data/csv"
+# retention_days = 90
+
+# ---------------------------------------------------------------- alert channels
+# Secrets can be written inline (password, url, secret), read from an environment variable
+# (password_env, url_env, secret_env) or from a file (password_file, url_file, secret_file).
+# events: incident, incident_update, incident_closed, trap_silent, trap_back (default: all)
+# clients: only alerts about these client ids (default: all); language: override per channel
+
+[[notify]]
+name = "mail"
+type = "smtp"
+host = "smtp.example.com"
+port = 587
+security = "starttls"           # starttls, ssl or none
+username = "alerts@example.com"
+password_env = "LANTRAP_SMTP_PASSWORD"
+from = "alerts@example.com"
+to = ["security@example.com"]
+
+[[notify]]
+name = "chat"
+type = "google_chat"
+url_env = "LANTRAP_GOOGLE_CHAT_URL"
+thread_by_incident = true       # updates about one incident go to the same thread
+events = ["incident", "incident_update", "trap_silent", "trap_back"]
+
+[[notify]]
+name = "hook"
+type = "webhook"                # POST of the JSON alert (schema lantrap.alert/1)
+url_env = "LANTRAP_WEBHOOK_URL"
+secret_env = "LANTRAP_WEBHOOK_SECRET"   # optional: X-Lantrap-Signature: sha256=<HMAC of the body>
+# headers = { Authorization = "Bearer ..." }
+enabled = false
+
+[[notify]]
+name = "ticket"
+type = "command"                # runs a program with the JSON alert on standard input
+argv = ["/usr/local/bin/open-ticket", "--queue", "security"]
+events = ["incident"]
+timeout = 30
+enabled = false
+
+# ---------------------------------------------------------------- clients and traps
+[[client]]
+id = "example"
+name = "Example Ltd"
+exclude = ["192.168.1.250"]     # for instance the network scanner of the IT team
+
+[[trap]]
+id = "example-hq"
+name = "Example head office"
+client = "example"
+source = ["10.99.0.11"]         # address the logs come from: the WireGuard address of the box
+hostname = "example-hq"         # optional extra check: log_hostname of the box
+tunnel_ip = "10.99.0.11"        # used by `lantrap openwrt` to set up WireGuard on the box
+exclude = []                    # exclusions of this trap only
+
+# ---------------------------------------------------------------- box setup (`lantrap openwrt <trap>`)
+[openwrt]
+receiver = "10.99.0.1"          # log_ip of the boxes
+log_port = 5514
+log_proto = "udp"
+ports = [21, 23, 139, 445, 1433, 3306, 3389, 5900, 8080]
+interface = "br-lan"
+set_name = "lantrap_exclude"
+rate_per_minute = 60
+heartbeat_minutes = 10          # cron job "logger -t lantrap heartbeat"; 0 = none
+ntp_servers = []                # empty = keep the defaults of the box
+ipv6 = false                    # also log IPv6 connections
+
+[wireguard]
+endpoint = "vpn.example.com:51820"
+public_key = "REPLACE_WITH_THE_RECEIVER_PUBLIC_KEY"
+receiver_ip = "10.99.0.1"
+network = "10.99.0.0/24"
+keepalive = 25

@@ -1,0 +1,24 @@
+# docker compose -f deploy/compose.yaml up -d --build
+#
+# deploy/config/lantrap.toml  configuration (storage paths under /data, for example path = "/data/lantrap.sqlite3")
+# deploy/data/                history, owned by uid 10514
+#
+# Host networking keeps the real sender address of every message, which is how traps are recognised.
+# With published ports instead, check that the container still sees the trap addresses (no proxy in between).
+services:
+  lantrap:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lan-trap-receiver
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./config:/config:ro
+      - ./data:/data
+    environment:
+      # secrets referenced with *_env in the configuration
+      - LANTRAP_SMTP_PASSWORD
+      - LANTRAP_GOOGLE_CHAT_URL
+      - LANTRAP_WEBHOOK_URL
+      - LANTRAP_WEBHOOK_SECRET

@@ -1,0 +1,17 @@
+# /etc/nftables.d/10-lantrap.nft on an OpenWrt box (fw4 includes it in table inet fw4).
+# Logs new TCP connections from the LAN to ports nobody should use on this box; nothing listens there,
+# so the box still refuses them. Apply with: fw4 check && fw4 reload
+# `lantrap openwrt <trap>` writes this file with the exclusions and ports of the configuration.
+# Excluded addresses can be changed live: nft add element inet fw4 lantrap_exclude { 192.168.1.250 }
+
+set lantrap_exclude {
+	type ipv4_addr
+	flags interval
+	auto-merge
+	elements = { 192.168.1.250 }
+}
+
+chain lantrap {
+	type filter hook input priority filter - 1; policy accept;
+	iifname "br-lan" ip saddr != @lantrap_exclude tcp dport { 21, 23, 139, 445, 1433, 3306, 3389, 5900, 8080 } ct state new limit rate 60/minute burst 20 packets log prefix "LANTRAP: " level warn
+}

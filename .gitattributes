@@ -1,0 +1,7 @@
+* text=auto
+# cmd needs CRLF: keep batch files byte for byte
+*.bat -text
+*.cmd -text
+# files executed on OpenWrt need LF
+*.sh text eol=lf
+*.nft text eol=lf
